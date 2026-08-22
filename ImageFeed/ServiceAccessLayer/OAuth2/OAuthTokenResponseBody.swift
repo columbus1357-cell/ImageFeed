@@ -7,10 +7,17 @@
 
 import Foundation
 
+// MARK: - OAuthTokenResponseBody
+
 struct OAuthTokenResponseBody: Decodable {
+
+    // MARK: - Internal Properties
+
     let accessToken: String
+
+    // MARK: - CodingKeys
+
     enum CodingKeys: String, CodingKey {
-            case accessToken = "access_token"
-        }
+        case accessToken = "access_token"
     }
-    
+}
