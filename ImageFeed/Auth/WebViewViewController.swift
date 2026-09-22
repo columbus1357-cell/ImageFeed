@@ -34,6 +34,10 @@ final class WebViewViewController: UIViewController {
 
     weak var delegate: WebViewViewControllerDelegate?
 
+    // MARK: - Private Properties
+
+    private var estimatedProgressObservation: NSKeyValueObservation?
+
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
@@ -42,41 +46,16 @@ final class WebViewViewController: UIViewController {
         progressView.progress = 0
         webView.navigationDelegate = self
         loadAuthView()
-    }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-
-        webView.addObserver(
-            self,
-            forKeyPath: #keyPath(WKWebView.estimatedProgress),
-            options: .new,
-            context: nil
+        
+        // Современный KVO через замыкание
+        estimatedProgressObservation = webView.observe(
+            \.estimatedProgress,
+            options: [],
+            changeHandler: { [weak self] _, _ in
+                guard let self else { return }
+                self.updateProgress()
+            }
         )
-    }
-
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-
-        webView.removeObserver(
-            self,
-            forKeyPath: #keyPath(WKWebView.estimatedProgress)
-        )
-    }
-
-    // MARK: - KVO
-
-    override func observeValue(
-        forKeyPath keyPath: String?,
-        of object: Any?,
-        change: [NSKeyValueChangeKey: Any]?,
-        context: UnsafeMutableRawPointer?
-    ) {
-        if keyPath == #keyPath(WKWebView.estimatedProgress) {
-            updateProgress()
-        } else {
-            super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
-        }
     }
 
     // MARK: - Private Methods
