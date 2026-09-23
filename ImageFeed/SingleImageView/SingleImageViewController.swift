@@ -61,16 +61,23 @@ final class SingleImageViewController: UIViewController {
     //MARK: - Private Methods
     
     private func rescaleAndCenterImageInScrollView(image: UIImage) {
+        scrollView.minimumZoomScale = 0.5
+        scrollView.maximumZoomScale = 3.0
+        
         let minZoomScale = scrollView.minimumZoomScale
         let maxZoomScale = scrollView.maximumZoomScale
+        
         view.layoutIfNeeded()
         let visibleRectSize = scrollView.bounds.size
         let imageSize = image.size
         let hScale = visibleRectSize.width / imageSize.width
         let vScale = visibleRectSize.height / imageSize.height
+        
         let scale = min(maxZoomScale, max(minZoomScale, min(hScale, vScale)))
+        
         scrollView.setZoomScale(scale, animated: false)
         scrollView.layoutIfNeeded()
+        
         let newContentSize = scrollView.contentSize
         let x = (newContentSize.width - visibleRectSize.width) / 2
         let y = (newContentSize.height - visibleRectSize.height) / 2
@@ -83,5 +90,26 @@ final class SingleImageViewController: UIViewController {
 extension SingleImageViewController: UIScrollViewDelegate {
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         return imageView
+    }
+    
+    func scrollViewDidZoom(_ scrollView: UIScrollView) {
+        
+        let boundsSize = scrollView.bounds.size
+        let imageFrame = imageView.frame
+        
+        let horizontalInset = imageFrame.width < boundsSize.width
+            ? (boundsSize.width - imageFrame.width) / 2
+            : 0
+            
+        let verticalInset = imageFrame.height < boundsSize.height
+            ? (boundsSize.height - imageFrame.height) / 2
+            : 0
+            
+        scrollView.contentInset = UIEdgeInsets(
+            top: verticalInset,
+            left: horizontalInset,
+            bottom: verticalInset,
+            right: horizontalInset
+        )
     }
 }
