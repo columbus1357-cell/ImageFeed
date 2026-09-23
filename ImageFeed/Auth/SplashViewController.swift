@@ -17,12 +17,20 @@ final class SplashViewController: UIViewController {
     
     private let imageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "auth_screen_logo") 
+        imageView.image = UIImage(named: "auth_screen_logo")
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
 
     // MARK: - Lifecycle
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        view.backgroundColor = UIColor(resource: .ypBlack)
+        setupSubviews()
+        setupConstraints()
+    }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -100,9 +108,8 @@ extension SplashViewController: AuthViewControllerDelegate {
              
             switch result {
             case .success(let profile):
-                 
                 ProfileImageService.shared.fetchProfileImageURL(username: profile.username) { _ in
-                     
+                    // TODO: Обработать получение URL аватарки при необходимости
                 }
                  
                 self.switchToTabBarController()

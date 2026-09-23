@@ -42,19 +42,16 @@ final class ProfileService {
             return
         }
         
-        // 2. Создаем запрос
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
-        // 3. Используем наш универсальный objectTask, который сразу декодирует JSON в ProfileResult
         let task = URLSession.shared.objectTask(for: request) { [weak self] (result: Result<ProfileResult, Error>) in
             guard let self else { return }
             
             DispatchQueue.main.async {
                 switch result {
                 case .success(let profileResult):
-                    // 4. Превращаем ProfileResult в красивую модель Profile для приложения
                     let profile = Profile(
                         username: profileResult.username,
                         name: "\(profileResult.firstName ?? "") \(profileResult.lastName ?? "")".trimmingCharacters(in: .whitespaces),
@@ -62,10 +59,8 @@ final class ProfileService {
                         bio: profileResult.bio
                     )
                     
-                    // Сохраняем профиль в свойство класса
                     self.profile = profile
                     
-                    // Возвращаем успех
                     completion(.success(profile))
                     
                 case .failure(let error):

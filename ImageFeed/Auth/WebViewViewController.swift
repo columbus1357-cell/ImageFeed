@@ -27,8 +27,8 @@ final class WebViewViewController: UIViewController {
 
     // MARK: - IBOutlets
 
-    @IBOutlet private var webView: WKWebView!
-    @IBOutlet private weak var progressView: UIProgressView!
+    @IBOutlet private var webView: WKWebView?
+    @IBOutlet private var progressView: UIProgressView?
 
     // MARK: - Public Properties
 
@@ -43,12 +43,12 @@ final class WebViewViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        progressView.progress = 0
-        webView.navigationDelegate = self
+        progressView?.progress = 0
+        webView?.navigationDelegate = self
         loadAuthView()
         
-        // Современный KVO через замыкание
-        estimatedProgressObservation = webView.observe(
+        // Современный KVO через замыкание с безопасным разворачиванием webView
+        estimatedProgressObservation = webView?.observe(
             \.estimatedProgress,
             options: [],
             changeHandler: { [weak self] _, _ in
@@ -77,12 +77,13 @@ final class WebViewViewController: UIViewController {
         }
 
         let request = URLRequest(url: url)
-        webView.load(request)
+        webView?.load(request)
     }
 
     private func updateProgress() {
-        progressView.progress = Float(webView.estimatedProgress)
-        progressView.isHidden = abs(webView.estimatedProgress - 1.0) <= 0.0001
+        guard let webView else { return }
+        progressView?.progress = Float(webView.estimatedProgress)
+        progressView?.isHidden = abs(webView.estimatedProgress - 1.0) <= 0.0001
     }
 }
 
