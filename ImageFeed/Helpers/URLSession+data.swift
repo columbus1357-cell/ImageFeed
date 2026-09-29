@@ -46,7 +46,8 @@ extension URLSession {
                 if 200 ..< 300 ~= statusCode {
                     fulfillCompletionOnTheMainThread(.success(data))
                 } else {
-                    Self.logger.error("HTTP Error Status Code: \(statusCode)")
+                    let urlString = request.url?.absoluteString ?? "Unknown URL"
+                    Self.logger.error("HTTP Error Status Code: \(statusCode), URL: \(urlString)")
                     fulfillCompletionOnTheMainThread(.failure(NetworkError.httpStatusCode(statusCode)))
                 }
             } else if let error = error {
@@ -73,11 +74,9 @@ extension URLSession {
             switch result {
             case .success(let data):
                 do {
-                    
                     let decodedObject = try decoder.decode(T.self, from: data)
                     completion(.success(decodedObject))
                 } catch {
-                    
                     let jsonString = String(data: data, encoding: .utf8) ?? ""
                     Self.logger.error("Decoding Error: \(error.localizedDescription, privacy: .public), Data: \(jsonString, privacy: .public)")
                     completion(.failure(NetworkError.decodingError(error)))
@@ -90,5 +89,4 @@ extension URLSession {
         
         return task
     }
-    
 }
