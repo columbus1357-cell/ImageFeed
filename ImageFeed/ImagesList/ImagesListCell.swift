@@ -5,7 +5,6 @@
 //  Created by Aleksandr on 31.07.2026.
 //
 
-
 import UIKit
 import Kingfisher
 
@@ -18,6 +17,12 @@ protocol ImagesListCellDelegate: AnyObject {
 // MARK: - ImagesListCell
 
 final class ImagesListCell: UITableViewCell {
+    
+    // MARK: - Constants
+    
+    private enum Constants {
+        static let likeButtonAccessibilityIdentifier = "like button"
+    }
     
     // MARK: - Static Properties
     
@@ -42,7 +47,7 @@ final class ImagesListCell: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         setupGradient()
-        likeButton.accessibilityIdentifier = "like button"
+        likeButton.accessibilityIdentifier = Constants.likeButtonAccessibilityIdentifier
     }
     
     override func prepareForReuse() {
@@ -75,10 +80,10 @@ final class ImagesListCell: UITableViewCell {
         if let thumbURL = URL(string: photo.thumbImageURL) {
             cellImage.kf.setImage(
                 with: thumbURL,
-                placeholder: UIImage(named: "stub")
+                placeholder: UIImage(resource: .stub)
             )
         } else {
-            cellImage.image = UIImage(named: "stub")
+            cellImage.image = UIImage(resource: .stub)
         }
         
         if let date = photo.createdAt {

@@ -38,7 +38,11 @@ final class ImagesListService {
         guard task == nil else { return }
         
         let nextPage = (lastLoadedPage ?? 0) + 1
-        let request = makePhotosRequest(page: nextPage)
+        
+        guard let request = makePhotosRequest(page: nextPage) else {
+            print("[ImagesListService fetchPhotosNextPage]: Failed to create URL request")
+            return
+        }
         
         let task = urlSession.objectTask(for: request) { [weak self] (result: Result<[PhotoResult], Error>) in
             guard let self else { return }
@@ -48,10 +52,17 @@ final class ImagesListService {
             switch result {
             case .success(let photoResults):
                 let newPhotos = photoResults.map { photoResult in
-                    Photo(
+                    let date: Date?
+                    if let dateString = photoResult.createdAt {
+                        date = Self.dateFormatter.date(from: dateString)
+                    } else {
+                        date = nil
+                    }
+                    
+                    return Photo(
                         id: photoResult.id,
                         size: CGSize(width: photoResult.width, height: photoResult.height),
-                        createdAt: photoResult.createdAt != nil ? Self.dateFormatter.date(from: photoResult.createdAt!) : nil,
+                        createdAt: date,
                         welcomeDescription: photoResult.description,
                         thumbImageURL: photoResult.urls.thumb,
                         largeImageURL: photoResult.urls.regular,
@@ -99,7 +110,7 @@ final class ImagesListService {
                         welcomeDescription: photo.welcomeDescription,
                         thumbImageURL: photo.thumbImageURL,
                         largeImageURL: photo.largeImageURL,
-                        isLiked: isLike // Передаем явно параметр isLike
+                        isLiked: isLike
                     )
                     self.photos = self.photos.withReplaced(itemAt: index, newValue: newPhoto)
                 }
@@ -122,8 +133,11 @@ final class ImagesListService {
     
     // MARK: - Private Methods
     
-    private func makePhotosRequest(page: Int) -> URLRequest {
-        let url = URL(string: "https://api.unsplash.com/photos?page=\(page)&per_page=10")!
+    private func makePhotosRequest(page: Int) -> URLRequest? {
+        guard let url = URL(string: "https://api.unsplash.com/photos?page=\(page)&per_page=10") else {
+            return nil
+        }
+        
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         

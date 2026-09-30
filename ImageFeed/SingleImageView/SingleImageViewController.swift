@@ -10,6 +10,20 @@ import Kingfisher
 
 final class SingleImageViewController: UIViewController {
     
+    // MARK: - Constants
+    
+    private enum Constants {
+        static let errorTitle = "Ошибка"
+        static let errorMessage = "Что-то пошло не так. Попробовать ещё раз?"
+        static let cancelTitle = "Не надо"
+        static let retryTitle = "Повторить"
+        
+        static let minInitialZoomScale: CGFloat = 0.1
+        static let maxInitialZoomScale: CGFloat = 1.25
+        static let minRescaleZoomScale: CGFloat = 0.5
+        static let maxRescaleZoomScale: CGFloat = 3.0
+    }
+    
     // MARK: - IBOutlets
     
     @IBOutlet private weak var imageView: UIImageView!
@@ -40,8 +54,8 @@ final class SingleImageViewController: UIViewController {
         super.viewDidLoad()
         
         scrollView.delegate = self
-        scrollView.minimumZoomScale = 0.1
-        scrollView.maximumZoomScale = 1.25
+        scrollView.minimumZoomScale = Constants.minInitialZoomScale
+        scrollView.maximumZoomScale = Constants.maxInitialZoomScale
         
         if let imageURL {
             setImage(with: imageURL)
@@ -54,11 +68,11 @@ final class SingleImageViewController: UIViewController {
     
     // MARK: - Actions
     
-    @IBAction func didTapBackButton(_ sender: UIButton) {
+    @IBAction private func didTapBackButton(_ sender: UIButton) {
         dismiss(animated: true, completion: nil)
     }
     
-    @IBAction func didTapShareButton(_ sender: UIButton) {
+    @IBAction private func didTapShareButton(_ sender: UIButton) {
         guard let image = imageView.image else { return }
         let shareController = UIActivityViewController(
             activityItems: [image],
@@ -87,13 +101,13 @@ final class SingleImageViewController: UIViewController {
     
     private func showError() {
         let alert = UIAlertController(
-            title: "Ошибка",
-            message: "Что-то пошло не так. Попробовать ещё раз?",
+            title: Constants.errorTitle,
+            message: Constants.errorMessage,
             preferredStyle: .alert
         )
         
-        let cancelAction = UIAlertAction(title: "Не надо", style: .default)
-        let retryAction = UIAlertAction(title: "Повторить", style: .default) { [weak self] _ in
+        let cancelAction = UIAlertAction(title: Constants.cancelTitle, style: .default)
+        let retryAction = UIAlertAction(title: Constants.retryTitle, style: .default) { [weak self] _ in
             guard let self, let imageURL = self.imageURL else { return }
             self.setImage(with: imageURL)
         }
@@ -105,8 +119,8 @@ final class SingleImageViewController: UIViewController {
     }
     
     private func rescaleAndCenterImageInScrollView(image: UIImage) {
-        scrollView.minimumZoomScale = 0.5
-        scrollView.maximumZoomScale = 3.0
+        scrollView.minimumZoomScale = Constants.minRescaleZoomScale
+        scrollView.maximumZoomScale = Constants.maxRescaleZoomScale
         
         let minZoomScale = scrollView.minimumZoomScale
         let maxZoomScale = scrollView.maximumZoomScale
