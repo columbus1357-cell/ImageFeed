@@ -49,7 +49,6 @@ final class ProfileLogoutService {
     }
     
     private func switchToSplashViewController() {
-        // Возвращаемся на SplashViewController
         guard let window = UIApplication.shared.connectedScenes
             .compactMap({ $0 as? UIWindowScene })
             .flatMap({ $0.windows })

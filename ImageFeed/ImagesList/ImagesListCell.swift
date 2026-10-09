@@ -47,7 +47,6 @@ final class ImagesListCell: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         setupGradient()
-        likeButton.accessibilityIdentifier = Constants.likeButtonAccessibilityIdentifier
     }
     
     override func prepareForReuse() {
@@ -96,9 +95,11 @@ final class ImagesListCell: UITableViewCell {
     }
     
     func setIsLiked(_ isLiked: Bool) {
-        let likeImage = UIImage(resource: isLiked ? .likeActive : .likeNoActive)
-        likeButton.setImage(likeImage, for: .normal)
-    }
+            let likeImage = UIImage(resource: isLiked ? .likeActive : .likeNoActive)
+            likeButton.setImage(likeImage, for: .normal)
+            
+            likeButton.accessibilityIdentifier = isLiked ? "like button on" : "like button off"
+        }
     
     // MARK: - Private Methods
     
