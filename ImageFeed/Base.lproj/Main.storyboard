@@ -143,6 +143,9 @@
                                                     </constraints>
                                                     <state key="normal" title="Button"/>
                                                     <buttonConfiguration key="configuration" style="plain" image="LikeActive"/>
+                                                    <connections>
+                                                        <action selector="likeButtonClicked" destination="FGM-0D-etE" eventType="touchUpInside" id="RiG-4A-dBj"/>
+                                                    </connections>
                                                 </button>
                                             </subviews>
                                             <constraints>

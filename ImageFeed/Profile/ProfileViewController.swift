@@ -12,6 +12,19 @@ import Kingfisher
 
 final class ProfileViewController: UIViewController {
     
+    // MARK: - Constants
+    
+    private enum Constants {
+        static let logoutAlertTitle = "Пока, пока!"
+        static let logoutAlertMessage = "Уверены, что хотите выйти?"
+        static let yesTitle = "Да"
+        static let noTitle = "Нет"
+        
+        static let logoutButtonAccessibilityIdentifier = "logout button"
+        static let nameLabelAccessibilityIdentifier = "Name Label"
+        static let loginNameLabelAccessibilityIdentifier = "Username Label"
+    }
+    
     // MARK: - Private Properties
     
     private var avatarImageView: UIImageView!
@@ -34,7 +47,7 @@ final class ProfileViewController: UIViewController {
         profileImageServiceObserver = NotificationCenter.default.addObserver(
             forName: ProfileImageService.didChangeNotification,
             object: nil,
-            queue: .main,
+            queue: .main
         ) { [weak self] _ in
             guard let self else { return }
             self.updateAvatar()
@@ -42,10 +55,31 @@ final class ProfileViewController: UIViewController {
         updateAvatar()
     }
     
+    deinit {
+        if let observer = profileImageServiceObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
+    
     // MARK: - Actions
     
     @objc private func didTapLogoutButton() {
-        // TODO: Обработка нажатия кнопки логаута
+        let alert = UIAlertController(
+            title: Constants.logoutAlertTitle,
+            message: Constants.logoutAlertMessage,
+            preferredStyle: .alert
+        )
+        
+        let yesAction = UIAlertAction(title: Constants.yesTitle, style: .default) { _ in
+            ProfileLogoutService.shared.logout()
+        }
+        
+        let noAction = UIAlertAction(title: Constants.noTitle, style: .default)
+        
+        alert.addAction(yesAction)
+        alert.addAction(noAction)
+        
+        present(alert, animated: true)
     }
     
     // MARK: - Private Methods
@@ -70,17 +104,18 @@ final class ProfileViewController: UIViewController {
         guard
             let profileImageURL = ProfileImageService.shared.avatarURL,
             let url = URL(string: profileImageURL)
-                else { return }
+        else { return }
         
+        let placeholder = UIImage(resource: .stub)
         avatarImageView.kf.setImage(
             with: url,
-            placeholder: UIImage(named: "placeholder.jpeg") ?? UIImage(systemName: "person.crop.circle.fill"),
+            placeholder: placeholder
         )
     }
     
     private func setupAvatarImageView() {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "AvatarPhoto") ?? UIImage(systemName: "person.crop.circle.fill")
+        imageView.image = UIImage(resource: .stub)
         imageView.tintColor = .gray
         imageView.layer.cornerRadius = 35
         imageView.clipsToBounds = true
@@ -101,9 +136,9 @@ final class ProfileViewController: UIViewController {
     
     private func setupNameLabel() {
         let label = UILabel()
-        label.text = "Екатерина Новикова"
         label.textColor = UIColor(resource: .ypWhite)
         label.font = UIFont.boldSystemFont(ofSize: 23)
+        label.accessibilityIdentifier = Constants.nameLabelAccessibilityIdentifier
         label.translatesAutoresizingMaskIntoConstraints = false
         
         view.addSubview(label)
@@ -118,9 +153,9 @@ final class ProfileViewController: UIViewController {
     
     private func setupLoginNameLabel() {
         let label = UILabel()
-        label.text = "@ekaterina_nov"
         label.textColor = UIColor(resource: .ypWhite)
         label.font = UIFont.systemFont(ofSize: 13)
+        label.accessibilityIdentifier = Constants.loginNameLabelAccessibilityIdentifier
         label.translatesAutoresizingMaskIntoConstraints = false
         
         view.addSubview(label)
@@ -135,7 +170,6 @@ final class ProfileViewController: UIViewController {
     
     private func setupDescriptionLabel() {
         let label = UILabel()
-        label.text = "Hello, world!"
         label.textColor = UIColor(resource: .ypWhite)
         label.font = UIFont.systemFont(ofSize: 13)
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -154,6 +188,7 @@ final class ProfileViewController: UIViewController {
         let buttonImage = UIImage(resource: .logoutButton)
         let button = UIButton.systemButton(with: buttonImage, target: self, action: #selector(didTapLogoutButton))
         button.tintColor = UIColor(resource: .ypRedIOS)
+        button.accessibilityIdentifier = Constants.logoutButtonAccessibilityIdentifier
         button.translatesAutoresizingMaskIntoConstraints = false
         
         view.addSubview(button)
