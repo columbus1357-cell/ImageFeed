@@ -10,7 +10,7 @@ import Kingfisher
 
 // MARK: - ProfileViewController
 
-final class ProfileViewController: UIViewController {
+final class ProfileViewController: UIViewController, ProfileViewControllerProtocol {
     
     // MARK: - Constants
     
@@ -25,6 +25,10 @@ final class ProfileViewController: UIViewController {
         static let loginNameLabelAccessibilityIdentifier = "Username Label"
     }
     
+    // MARK: - Public Properties
+    
+    var presenter: ProfilePresenterProtocol?
+    
     // MARK: - Private Properties
     
     private var avatarImageView: UIImageView!
@@ -32,7 +36,13 @@ final class ProfileViewController: UIViewController {
     private var loginNameLabel: UILabel!
     private var descriptionLabel: UILabel!
     private var logoutButton: UIButton!
-    private var profileImageServiceObserver: NSObjectProtocol?
+    
+    // MARK: - Configure
+    
+    func configure(_ presenter: ProfilePresenterProtocol) {
+        self.presenter = presenter
+        self.presenter?.view = self
+    }
     
     // MARK: - Lifecycle
     
@@ -42,23 +52,29 @@ final class ProfileViewController: UIViewController {
         view.backgroundColor = UIColor(resource: .ypBlack)
         setupUI()
         
-        updateProfileDetails(profile: ProfileService.shared.profile)
-        
-        profileImageServiceObserver = NotificationCenter.default.addObserver(
-            forName: ProfileImageService.didChangeNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            guard let self else { return }
-            self.updateAvatar()
+        if presenter == nil {
+            configure(ProfilePresenter())
         }
-        updateAvatar()
+        
+        presenter?.viewDidLoad()
     }
     
-    deinit {
-        if let observer = profileImageServiceObserver {
-            NotificationCenter.default.removeObserver(observer)
-        }
+    // MARK: - ProfileViewControllerProtocol
+    
+    func updateProfileDetails(profile: Profile?) {
+        guard let profile else { return }
+        
+        nameLabel.text = profile.name
+        loginNameLabel.text = profile.loginName
+        descriptionLabel.text = profile.bio
+    }
+    
+    func updateAvatar(url: URL) {
+        let placeholder = UIImage(resource: .stub)
+        avatarImageView.kf.setImage(
+            with: url,
+            placeholder: placeholder
+        )
     }
     
     // MARK: - Actions
@@ -70,8 +86,8 @@ final class ProfileViewController: UIViewController {
             preferredStyle: .alert
         )
         
-        let yesAction = UIAlertAction(title: Constants.yesTitle, style: .default) { _ in
-            ProfileLogoutService.shared.logout()
+        let yesAction = UIAlertAction(title: Constants.yesTitle, style: .default) { [weak self] _ in
+            self?.presenter?.logOut()
         }
         
         let noAction = UIAlertAction(title: Constants.noTitle, style: .default)
@@ -90,27 +106,6 @@ final class ProfileViewController: UIViewController {
         setupLoginNameLabel()
         setupDescriptionLabel()
         setupLogoutButton()
-    }
-    
-    private func updateProfileDetails(profile: Profile?) {
-        guard let profile else { return }
-        
-        nameLabel.text = profile.name
-        loginNameLabel.text = profile.loginName
-        descriptionLabel.text = profile.bio
-    }
-    
-    private func updateAvatar() {
-        guard
-            let profileImageURL = ProfileImageService.shared.avatarURL,
-            let url = URL(string: profileImageURL)
-        else { return }
-        
-        let placeholder = UIImage(resource: .stub)
-        avatarImageView.kf.setImage(
-            with: url,
-            placeholder: placeholder
-        )
     }
     
     private func setupAvatarImageView() {
